@@ -24,6 +24,8 @@ use App\Http\Controllers\Petugas\ProfileController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaDashboardController;
 use App\Http\Controllers\Siswa\KatalogController;
 use App\Http\Controllers\Siswa\PeminjamanController as SiswaPeminjamanController;
+use App\Http\Controllers\Siswa\ProfileController as SiswaProfileController;
+use App\Http\Controllers\Siswa\KoleksiController;
 
 
 /* ================= HALAMAN AWAL ================= */
@@ -82,28 +84,27 @@ Route::middleware(['ceklogin'])->prefix('admin')->group(function () {
     Route::delete('siswa/{id}', [SiswaController::class, 'destroy'])
         ->name('siswa.destroy');
 
-    // ===== ULASAN ADMIN =====
     Route::get('/ulasan', [AdminUlasanController::class, 'index'])
         ->name('admin.ulasan.index');
 
     Route::delete('/ulasan/{id}', [AdminUlasanController::class, 'destroy'])
         ->name('admin.ulasan.destroy');
 
-         Route::get('/profil', [DashboardController::class, 'profil'])
+    Route::get('/profil', [DashboardController::class, 'profil'])
         ->name('profil');
 
     Route::get('/profil/edit', [DashboardController::class, 'editProfil'])
         ->name('profil.edit');
 
     Route::post('/profil/update', [DashboardController::class, 'updateProfil'])
-    ->name('profil.update');
+        ->name('profil.update');
 });
 
 
 /* ================= PETUGAS ================= */
 Route::middleware(['ceklogin'])
     ->prefix('petugas')
-    ->as('petugas.') // 👈 ini yang penting
+    ->as('petugas.')
     ->group(function () {
 
         Route::get('/dashboard', [PetugasDashboardController::class, 'index'])
@@ -117,20 +118,19 @@ Route::middleware(['ceklogin'])
             [PetugasPeminjamanController::class, 'verifikasi'])
             ->name('peminjaman.verifikasi');
 
-        // ===== ULASAN PETUGAS (VIEW ONLY) =====
         Route::get('/ulasan', [PetugasUlasanController::class, 'index'])
             ->name('ulasan.index');
 
-    Route::get('/profile', [ProfileController::class, 'index'])
-    ->name('profile');
+        Route::get('/profile', [ProfileController::class, 'index'])
+            ->name('profile');
 
-Route::post('/profile/update', [ProfileController::class, 'update'])
-    ->name('profile.update');
+        Route::post('/profile/update', [ProfileController::class, 'update'])
+            ->name('profile.update');
 
-Route::post('/profile/password', [ProfileController::class, 'updatePassword'])
-    ->name('profile.password');
-
+        Route::post('/profile/password', [ProfileController::class, 'updatePassword'])
+            ->name('profile.password');
 });
+
 
 /* ================= SISWA ================= */
 Route::middleware(['ceklogin'])
@@ -164,4 +164,24 @@ Route::middleware(['ceklogin'])
 
         Route::post('/ulasan', [SiswaPeminjamanController::class, 'simpanUlasan'])
             ->name('ulasan.simpan');
+
+        /* ===== KOLEKSI BUKU ===== */
+        Route::get('/koleksi', [KoleksiController::class, 'index'])
+            ->name('koleksi');
+
+        Route::post('/koleksi/{id}', [KoleksiController::class, 'tambah'])
+            ->name('koleksi.tambah');
+
+        Route::delete('/koleksi/{id}', [KoleksiController::class, 'hapus'])
+            ->name('koleksi.hapus');
+
+        /* ===== PROFIL ===== */
+        Route::get('/profile', [SiswaProfileController::class, 'index'])
+            ->name('profile');
+
+        Route::get('/profile/edit', [SiswaProfileController::class, 'edit'])
+            ->name('profile.edit');
+
+        Route::post('/profile/update', [SiswaProfileController::class, 'update'])
+            ->name('profile.update');
 });
