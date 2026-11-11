@@ -9,10 +9,50 @@ use App\Models\Kategori;
 
 class BukuController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $buku = Buku::with('kategori')->get();
+        $validated = $request->validate([
+            'search' => ['nullable', 'string'],
+            'status' => ['nullable', 'in:menunggu,disetujui,ditolak'],
+        ]);
+        $search = trim($validated['search'] ?? '');
+        $status = $validated['status'] ?? '';
+
+        $buku = $this->queryBuku($search, $status)->paginate(10)->withQueryString();
         return view('petugas.buku.index', compact('buku'));
+    }
+
+    public function cetak(Request $request)
+    {
+        $validated = $request->validate([
+            'search' => ['nullable', 'string'],
+            'status' => ['nullable', 'in:menunggu,disetujui,ditolak'],
+        ]);
+        $search = trim($validated['search'] ?? '');
+        $status = $validated['status'] ?? '';
+        $buku = $this->queryBuku($search, $status)->get();
+
+        return view('admin.laporan.buku', compact('buku', 'search', 'status'));
+    }
+
+    private function queryBuku(string $search, string $status)
+    {
+        return Buku::with('kategori')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('judul', 'like', "%{$search}%")
+                        ->orWhere('penulis', 'like', "%{$search}%")
+                        ->orWhere('penerbit', 'like', "%{$search}%")
+                        ->orWhere('tahun_terbit', 'like', "%{$search}%")
+                        ->orWhereHas('kategori', function ($query) use ($search) {
+                            $query->where('nama_kategori', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($status !== '', function ($query) use ($status) {
+                $query->where('status_validasi', $status);
+            })
+            ->orderBy('judul');
     }
 
     public function create()
@@ -46,11 +86,12 @@ class BukuController extends Controller
             'kategori_id' => $request->kategori_id,
             'tahun_terbit' => $request->tahun_terbit,
             'stok' => $request->stok,
-            'gambar' => $gambar
+            'gambar' => $gambar,
+            'status_validasi' => Buku::STATUS_MENUNGGU,
         ]);
 
-        return redirect()->route('buku.index')
-            ->with('success','Buku berhasil ditambahkan');
+        return redirect()->route('petugas.buku.index')
+            ->with('success', 'Buku berhasil dikirim dan menunggu validasi Admin.');
     }
 
     public function edit($id)
@@ -80,14 +121,14 @@ class BukuController extends Controller
             'gambar' => $gambar
         ]);
 
-        return redirect()->route('buku.index')
+        return redirect()->route('petugas.buku.index')
             ->with('success','Buku berhasil diupdate');
     }
 
     public function destroy($id)
     {
         Buku::findOrFail($id)->delete();
-        return redirect()->route('buku.index')
+        return redirect()->route('petugas.buku.index')
             ->with('success','Buku berhasil dihapus');
     }
 }

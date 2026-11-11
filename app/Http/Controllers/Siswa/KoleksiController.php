@@ -15,6 +15,9 @@ class KoleksiController extends Controller
     {
         $koleksi = KoleksiBuku::with('buku')
             ->where('user_id', session('user_id'))
+            ->whereHas('buku', function ($query) {
+                $query->disetujui();
+            })
             ->latest()
             ->get();
 
@@ -29,7 +32,7 @@ class KoleksiController extends Controller
         $userId = session('user_id');
 
         // cek buku ada
-        $buku = Buku::findOrFail($id);
+        $buku = Buku::disetujui()->findOrFail($id);
 
         // cek sudah ada di koleksi atau belum
         $cek = KoleksiBuku::where('user_id', $userId)

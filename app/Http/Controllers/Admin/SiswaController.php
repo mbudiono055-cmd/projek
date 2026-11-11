@@ -4,15 +4,41 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SiswaController extends Controller
 {
     // TAMPIL DATA
-    public function index()
+    public function index(Request $request)
     {
-        $siswa = User::where('role', 'siswa')->get();
+        $validated = $request->validate(['search' => ['nullable', 'string']]);
+        $search = trim($validated['search'] ?? '');
+
+        $siswa = $this->querySiswa($search)->paginate(10)->withQueryString();
+
         return view('admin.siswa.index', compact('siswa'));
+    }
+
+    public function cetak(Request $request)
+    {
+        $validated = $request->validate(['search' => ['nullable', 'string']]);
+        $search = trim($validated['search'] ?? '');
+        $siswa = $this->querySiswa($search)->get();
+
+        return view('admin.laporan.siswa', compact('siswa', 'search'));
+    }
+
+    private function querySiswa(string $search)
+    {
+        return User::where('role', 'siswa')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('nama', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('nama');
     }
 
     // EXPORT CSV

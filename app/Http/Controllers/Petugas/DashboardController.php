@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Petugas;
 
 use App\Http\Controllers\Controller;
 use App\Models\Buku;
-use App\Models\User;
 use App\Models\Peminjaman;
 use Carbon\Carbon;
 
@@ -18,13 +17,13 @@ class DashboardController extends Controller
     // ================= STATISTIK =================
     $totalBuku = Buku::count();
 
-    $totalPetugas = User::where('role', 'petugas')->count();
-
     // Sedang dipinjam = diterima + terlambat
     $dipinjam = Peminjaman::whereIn('status', [
         Peminjaman::STATUS_DITERIMA,
         Peminjaman::STATUS_TERLAMBAT
     ])->count();
+
+    $menunggu = Peminjaman::where('status', Peminjaman::STATUS_MENUNGGU)->count();
 
     // Hitung yang benar-benar sudah terlambat
     $terlambat = Peminjaman::where(
@@ -40,9 +39,9 @@ class DashboardController extends Controller
 
     return view('petugas.dashboard', compact(
         'totalBuku',
-        'totalPetugas',
         'dipinjam',
         'terlambat',
+        'menunggu',
         'data'
     ));
 }

@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | DigiLibrary</title>
+    <title>Login | Luxurious</title>
     
     <!-- Tailwind CSS via CDN -->
+    <script src="{{ asset('js/digilibrary-theme.js') }}"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Font Google -->
@@ -55,11 +56,11 @@
                     <div class="bg-white/10 backdrop-blur-md p-3 rounded-3xl border border-white/20 shadow-2xl">
                         <!-- LOGO BULET (Menggunakan asset() Laravel) -->
                         <img src="{{ asset('assets/logo.png') }}" 
-                             alt="Logo DigiLibrary" 
+                             alt="Logo Luxurious"
                              class="w-20 h-20 rounded-full object-cover border-2 border-white/30 shadow-inner">
                     </div>
                 </div>
-                <h1 class="text-4xl font-extrabold mb-4 tracking-tight">DigiLibrary</h1>
+                <h1 class="text-4xl font-extrabold mb-4 tracking-tight">Luxurious</h1>
                 <p class="text-lg text-indigo-100 leading-relaxed">
                     Sistem peminjaman buku digital terintegrasi. Akses ribuan koleksi buku di mana saja dan kapan saja dengan mudah dan cepat.
                 </p>
@@ -80,10 +81,10 @@
                     <!-- Logo Mobile Kecil -->
                     <div class="flex justify-center mb-4">
                          <img src="{{ asset('assets/logo.png') }}" 
-                             alt="Logo DigiLibrary" 
+                             alt="Logo Luxurious"
                              class="w-16 h-16 rounded-full object-cover shadow-md">
                     </div>
-                    <h1 class="text-3xl font-bold text-slate-800 mb-2">DigiLibrary</h1>
+                    <h1 class="text-3xl font-bold text-slate-800 mb-2">Luxurious</h1>
                     <p class="text-slate-500">Masuk untuk melanjutkan</p>
                 </div>
 
@@ -182,7 +183,7 @@
             
             <!-- Footer Desktop -->
             <div class="mt-auto text-center text-xs text-slate-400 pt-8 lg:pt-0">
-                &copy; 2023 DigiLibrary. Hak Cipta Dilindungi.
+                &copy; 2023 Luxurious. Hak Cipta Dilindungi.
             </div>
         </div>
     </div>

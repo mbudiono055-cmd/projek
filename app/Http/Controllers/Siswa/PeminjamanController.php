@@ -28,7 +28,7 @@ class PeminjamanController extends Controller
                 ->with('error', 'Silakan login terlebih dahulu');
         }
 
-        $buku = Buku::findOrFail($id);
+        $buku = Buku::disetujui()->findOrFail($id);
 
         if ($request->jumlah > $buku->stok) {
             return back()->with('error', 'Jumlah melebihi stok tersedia');
@@ -75,9 +75,9 @@ class PeminjamanController extends Controller
     {
         $userId = session('user_id');
 
-        $data = Peminjaman::where('user_id', $userId)
-                    ->whereIn('status', ['menunggu', 'diterima'])
-                    ->with('buku')
+        $data = Peminjaman::with('buku')
+                    ->where('user_id', $userId)
+                    ->aktif()
                     ->latest()
                     ->get();
 
@@ -100,17 +100,17 @@ class PeminjamanController extends Controller
     }
 
     public function bukti($id)
-{
-    $userId = session('user_id');
+    {
+        $userId = session('user_id');
 
-    $data = Peminjaman::where('id', $id)
+        $data = Peminjaman::where('id', $id)
                 ->where('user_id', $userId)
-                ->whereIn('status', ['diterima', 'dikembalikan'])
-                ->with('buku')
+                ->whereIn('status', ['diterima', 'terlambat', 'dikembalikan'])
+                ->with(['buku', 'user'])
                 ->firstOrFail();
 
-    return view('siswa.bukti', compact('data'));
-}
+        return view('siswa.bukti', compact('data'));
+    }
 
     /**
      * Batalkan pengajuan (hanya jika masih menunggu)
@@ -134,14 +134,16 @@ class PeminjamanController extends Controller
     public function simpanUlasan(Request $request)
 {
     $request->validate([
-        'buku_id' => 'required',
+        'buku_id' => 'required|integer',
         'rating' => 'required|integer|min:1|max:5',
         'komentar' => 'required'
     ]);
 
+    $buku = Buku::disetujui()->findOrFail($request->buku_id);
+
     Ulasan::create([
         'user_id' => session('user_id'),
-        'buku_id' => $request->buku_id,
+        'buku_id' => $buku->id,
         'rating' => $request->rating,
         'komentar' => $request->komentar
     ]);

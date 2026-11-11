@@ -14,7 +14,7 @@ class KatalogController extends Controller
     {
         $kategori = Kategori::all();
 
-        $bukus = Buku::with('kategori')
+        $bukus = Buku::disetujui()->with('kategori')
             ->when($request->kategori, function ($query) use ($request) {
                 $query->where('kategori_id', $request->kategori);
             })
@@ -30,7 +30,7 @@ class KatalogController extends Controller
     // ================= DETAIL =================
     public function show($id)
     {
-        $buku = Buku::with(['kategori', 'ulasans.user'])
+        $buku = Buku::disetujui()->with(['kategori', 'ulasans.user'])
                     ->findOrFail($id);
 
         return view('siswa.detail', compact('buku'));

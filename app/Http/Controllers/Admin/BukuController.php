@@ -9,10 +9,66 @@ use App\Models\Kategori;
 
 class BukuController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $buku = Buku::with('kategori')->get();
-        return view('admin.buku.index', compact('buku'));
+        $validated = $request->validate([
+            'search' => ['nullable', 'string'],
+            'status' => ['nullable', 'in:menunggu,disetujui,ditolak'],
+        ]);
+        $search = trim($validated['search'] ?? '');
+        $status = $validated['status'] ?? '';
+
+        $buku = Buku::with('kategori')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('judul', 'like', "%{$search}%")
+                        ->orWhere('penulis', 'like', "%{$search}%")
+                        ->orWhere('penerbit', 'like', "%{$search}%")
+                        ->orWhere('tahun_terbit', 'like', "%{$search}%")
+                        ->orWhereHas('kategori', function ($query) use ($search) {
+                            $query->where('nama_kategori', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($status !== '', function ($query) use ($status) {
+                $query->where('status_validasi', $status);
+            })
+            ->orderBy('judul')
+            ->paginate(10)
+            ->withQueryString();
+        $menungguValidasi = Buku::where('status_validasi', Buku::STATUS_MENUNGGU)->count();
+
+        return view('admin.buku.index', compact('buku', 'menungguValidasi'));
+    }
+
+    public function cetak(Request $request)
+    {
+        $validated = $request->validate([
+            'search' => ['nullable', 'string'],
+            'status' => ['nullable', 'in:menunggu,disetujui,ditolak'],
+        ]);
+        $search = trim($validated['search'] ?? '');
+        $status = $validated['status'] ?? '';
+
+        $buku = Buku::with('kategori')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('judul', 'like', "%{$search}%")
+                        ->orWhere('penulis', 'like', "%{$search}%")
+                        ->orWhere('penerbit', 'like', "%{$search}%")
+                        ->orWhere('tahun_terbit', 'like', "%{$search}%")
+                        ->orWhereHas('kategori', function ($query) use ($search) {
+                            $query->where('nama_kategori', 'like', "%{$search}%");
+                        });
+                });
+            })
+            ->when($status !== '', function ($query) use ($status) {
+                $query->where('status_validasi', $status);
+            })
+            ->orderBy('judul')
+            ->get();
+
+        return view('admin.laporan.buku', compact('buku', 'search', 'status'));
     }
 
     public function create()
@@ -46,7 +102,8 @@ class BukuController extends Controller
             'kategori_id' => $request->kategori_id,
             'tahun_terbit' => $request->tahun_terbit,
             'stok' => $request->stok,
-            'gambar' => $gambar
+            'gambar' => $gambar,
+            'status_validasi' => Buku::STATUS_DISETUJUI,
         ]);
 
         return redirect()->route('buku.index')
@@ -100,5 +157,26 @@ class BukuController extends Controller
 
         return redirect()->route('buku.index')
             ->with('success', 'Buku berhasil dihapus');
+    }
+
+    public function validasi(Request $request, $id)
+    {
+        abort_unless(session('role') === 'admin', 403);
+
+        $validated = $request->validate([
+            'aksi' => ['required', 'in:setujui,tolak'],
+        ]);
+
+        $buku = Buku::where('status_validasi', Buku::STATUS_MENUNGGU)->findOrFail($id);
+        $buku->status_validasi = $validated['aksi'] === 'setujui'
+            ? Buku::STATUS_DISETUJUI
+            : Buku::STATUS_DITOLAK;
+        $buku->save();
+
+        $pesan = $validated['aksi'] === 'setujui'
+            ? 'Buku berhasil disetujui dan ditampilkan di katalog.'
+            : 'Buku ditolak dan tidak ditampilkan di katalog.';
+
+        return redirect()->route('buku.index')->with('success', $pesan);
     }
 }

@@ -13,7 +13,7 @@ class DashboardController extends Controller
     {
         $userId = session('user_id');
 
-        $totalBuku = Buku::count();
+        $totalBuku = Buku::disetujui()->count();
 
         // Hitung yang sedang dipinjam (diterima + terlambat)
         $dipinjam = Peminjaman::where('user_id', $userId)
@@ -24,7 +24,7 @@ class DashboardController extends Controller
                             ->where('status', 'dikembalikan')
                             ->count();
 
-        $bukuTerbaru = Buku::latest()->take(4)->get();
+        $bukuTerbaru = Buku::disetujui()->latest()->take(4)->get();
 
         return view('siswa.dashboard', compact(
             'totalBuku',
@@ -38,7 +38,7 @@ class DashboardController extends Controller
     // ================= KATALOG =================
     public function katalog()
     {
-        $bukus = Buku::all();
+        $bukus = Buku::disetujui()->get();
         return view('siswa.katalog', compact('bukus'));
     }
 
@@ -47,7 +47,7 @@ class DashboardController extends Controller
     public function pinjam($id)
     {
         $userId = session('user_id');
-        $buku = Buku::findOrFail($id);
+        $buku = Buku::disetujui()->findOrFail($id);
 
         if ($buku->stok <= 0) {
             return back()->with('error', 'Stok buku habis!');

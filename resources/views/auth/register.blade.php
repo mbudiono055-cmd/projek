@@ -6,6 +6,7 @@
     <title>Register | Budi Perpus</title>
     
     <!-- Tailwind CSS via CDN -->
+    <script src="{{ asset('js/digilibrary-theme.js') }}"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Font Google -->
@@ -54,13 +55,13 @@
                     <div class="bg-white/10 backdrop-blur-md p-3 rounded-3xl border border-white/20 shadow-2xl">
                         <!-- Menggunakan helper asset() Laravel untuk logo -->
                         <img src="{{ asset('assets/logo.png') }}" 
-                             alt="Logo DigiLibrary" 
+                             alt="Logo Luxurious"
                              class="w-20 h-20 rounded-full object-cover border-2 border-white/30 shadow-inner">
                     </div>
                 </div>
-                <h1 class="text-4xl font-extrabold mb-4 tracking-tight">DigiLibrary</h1>
+                <h1 class="text-4xl font-extrabold mb-4 tracking-tight">Luxurious</h1>
                 <p class="text-lg text-indigo-100 leading-relaxed">
-                    Bergabunglah dengan DigiLibrary. Akses ribuan koleksi buku digital, nikmati kemudahan peminjaman, dan eksplorasi pengetahuan tanpa batas.
+                    Bergabunglah dengan Luxurious. Akses ribuan koleksi buku digital, nikmati kemudahan peminjaman, dan eksplorasi pengetahuan tanpa batas.
                 </p>
             </div>
             

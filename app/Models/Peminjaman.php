@@ -19,12 +19,14 @@ class Peminjaman extends Model
         'jumlah',
         'tanggal_pinjam',
         'tanggal_kembali',
+        'tanggal_dikembalikan',
         'status'
     ];
 
     protected $casts = [
         'tanggal_pinjam'   => 'date',
         'tanggal_kembali'  => 'date',
+        'tanggal_dikembalikan' => 'date',
     ];
 
     /*

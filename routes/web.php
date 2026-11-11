@@ -26,6 +26,7 @@ use App\Http\Controllers\Siswa\KatalogController;
 use App\Http\Controllers\Siswa\PeminjamanController as SiswaPeminjamanController;
 use App\Http\Controllers\Siswa\ProfileController as SiswaProfileController;
 use App\Http\Controllers\Siswa\KoleksiController;
+use App\Http\Controllers\Siswa\AsistenAiController;
 
 
 /* ================= HALAMAN AWAL ================= */
@@ -66,9 +67,17 @@ Route::middleware(['ceklogin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('admin.dashboard');
 
+    Route::get('buku/laporan', [BukuController::class, 'cetak'])
+        ->name('buku.laporan.cetak');
     Route::resource('buku', BukuController::class);
+    Route::post('buku/{id}/validasi', [BukuController::class, 'validasi'])
+        ->name('buku.validasi');
+    Route::get('petugas/laporan', [PetugasController::class, 'cetak'])
+        ->name('petugas.laporan.cetak');
     Route::resource('petugas', PetugasController::class);
     Route::resource('kategori', KategoriController::class);
+    Route::get('peminjaman/laporan', [PeminjamanController::class, 'cetak'])
+        ->name('peminjaman.laporan.cetak');
     Route::resource('peminjaman', PeminjamanController::class);
 
     Route::post('peminjaman/{id}/{aksi}',
@@ -78,6 +87,8 @@ Route::middleware(['ceklogin'])->prefix('admin')->group(function () {
     Route::get('siswa', [SiswaController::class, 'index'])
         ->name('siswa.index');
 
+    Route::get('siswa/laporan', [SiswaController::class, 'cetak'])
+        ->name('siswa.laporan.cetak');
     Route::get('siswa/export', [SiswaController::class, 'export'])
         ->name('siswa.export');
 
@@ -110,8 +121,12 @@ Route::middleware(['ceklogin'])
         Route::get('/dashboard', [PetugasDashboardController::class, 'index'])
             ->name('dashboard');
 
+        Route::get('buku/laporan', [PetugasBukuController::class, 'cetak'])
+            ->name('buku.laporan.cetak');
         Route::resource('buku', PetugasBukuController::class);
         Route::resource('kategori', PetugasKategoriController::class);
+        Route::get('peminjaman/laporan', [PetugasPeminjamanController::class, 'cetak'])
+            ->name('peminjaman.laporan.cetak');
         Route::resource('peminjaman', PetugasPeminjamanController::class);
 
         Route::post('peminjaman/{id}/{aksi}',
@@ -140,6 +155,12 @@ Route::middleware(['ceklogin'])
 
         Route::get('/dashboard', [SiswaDashboardController::class, 'dashboard'])
             ->name('dashboard');
+
+        Route::get('/asisten-ai', [AsistenAiController::class, 'index'])
+            ->name('asisten-ai');
+        Route::post('/asisten-ai/tanya', [AsistenAiController::class, 'tanya'])
+            ->middleware('throttle:10,1')
+            ->name('asisten-ai.tanya');
 
         Route::get('/katalog', [KatalogController::class, 'index'])
             ->name('katalog');

@@ -17,6 +17,7 @@ class DashboardController extends Controller
         Peminjaman::all()->each->cekStatusTerlambat();
 
         $totalBuku = Buku::count();
+        $menungguValidasiBuku = Buku::where('status_validasi', Buku::STATUS_MENUNGGU)->count();
         $totalPetugas = User::where('role', 'petugas')->count();
 
         $dipinjam = Peminjaman::whereIn('status', [
@@ -36,6 +37,7 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', compact(
             'totalBuku',
+            'menungguValidasiBuku',
             'totalPetugas',
             'dipinjam',
             'terlambat',

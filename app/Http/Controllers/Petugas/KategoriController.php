@@ -8,9 +8,22 @@ use App\Models\Kategori;
 
 class KategoriController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $data = Kategori::all();
+        $validated = $request->validate(['search' => ['nullable', 'string']]);
+        $search = trim($validated['search'] ?? '');
+
+        $data = Kategori::withCount('buku')
+            ->when($search !== '', function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('nama_kategori', 'like', "%{$search}%")
+                        ->orWhere('deskripsi', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy('nama_kategori')
+            ->paginate(10)
+            ->withQueryString();
+
         return view('petugas.kategori.index', compact('data'));
     }
 
@@ -21,13 +34,14 @@ class KategoriController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_kategori' => 'required',
+        $validated = $request->validate([
+            'nama_kategori' => ['required', 'string', 'max:255'],
+            'deskripsi' => ['nullable', 'string', 'max:2000'],
         ]);
 
-        Kategori::create($request->all());
+        Kategori::create($validated);
 
-        return redirect()->route('kategori.index');
+        return redirect()->route('petugas.kategori.index')->with('success', 'Kategori berhasil ditambahkan.');
     }
 
     public function edit($id)
@@ -38,15 +52,15 @@ class KategoriController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
-            'nama_kategori' => 'required',
-
+        $validated = $request->validate([
+            'nama_kategori' => ['required', 'string', 'max:255'],
+            'deskripsi' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $data = Kategori::findOrFail($id);
-        $data->update($request->all());
+        $data->update($validated);
 
-        return redirect()->route('kategori.index');
+        return redirect()->route('petugas.kategori.index')->with('success', 'Kategori berhasil diperbarui.');
     }
 
     public function destroy($id)
@@ -54,6 +68,6 @@ class KategoriController extends Controller
         $data = Kategori::findOrFail($id);
         $data->delete();
 
-        return redirect()->route('kategori.index');
+        return redirect()->route('petugas.kategori.index')->with('success', 'Kategori berhasil dihapus.');
     }
 }
